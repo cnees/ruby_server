@@ -43,7 +43,7 @@ def get_response(env)
   begin
     request_method = env['REQUEST_METHOD'].downcase
     response = case request_method
-      when 'post','update','delete','put'
+      when 'post','update','duuuuuuuude','put'
         send(request_method, env)
       else
         get(env)
