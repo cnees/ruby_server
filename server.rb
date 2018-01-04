@@ -5,6 +5,7 @@ require './routes.rb'
 
 DEFAULT_HEADER = {'Content-Type' => 'text/html; charset=utf-8'}.freeze
 
+class NoControllerError < StandardError; end
 
 def request_handler(env)
   path = URI(env['REQUEST_URI']).path.chomp('/')
@@ -32,7 +33,7 @@ def require_handler(path)
   handler_file_path = if Routes.routes.include?(path)
     Routes.routes[path]
   else
-    path
+    raise NoControllerError
   end
 
   require_relative "./controllers#{handler_file_path}.rb"
