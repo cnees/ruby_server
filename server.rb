@@ -8,8 +8,9 @@ DEFAULT_HEADER = {'Content-Type' => 'text/html; charset=utf-8'}.freeze
 
 class NoControllerError < StandardError; end
 
-def request_handler(env)
+def handle_request(env)
   request_path = URI(env['REQUEST_URI']).path.chomp('/')
+
   begin
     controller_path = controller_file_path(request_path)
     require_controller(controller_path)
@@ -57,4 +58,4 @@ def klass(path)
   Object.const_get(path.split('/').last.split('_').map(&:capitalize).join)
 end
 
-Rack::Handler::WEBrick.run Proc.new{|env| request_handler(env)}
+Rack::Handler::WEBrick.run Proc.new{|env| handle_request(env)}
