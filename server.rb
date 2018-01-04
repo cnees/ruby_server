@@ -3,8 +3,10 @@ require 'uri'
 require './routes.rb'
 require './abstract_controller.rb'
 
-
-DEFAULT_HEADER = {'Content-Type' => 'text/html; charset=utf-8'}.freeze
+DEFAULT_HEADERS = {
+  'Content-Type' => 'text/html; charset=utf-8',
+  'Content-Language' => 'en-US'
+}.freeze
 
 class NoControllerError < StandardError; end
 
@@ -23,8 +25,8 @@ def handle_request(env)
 
   [
     response&.[](:status) || 200,
-    response&.[](:headers) || DEFAULT_HEADER,
-    response&.[:body] ? [response[:body]] : []
+    DEFAULT_HEADERS.merge(response&.[](:headers) || {}),
+    response&.[](:body) ? [response[:body]] : []
   ]
 end
 
