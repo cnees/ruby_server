@@ -8,7 +8,7 @@ DEFAULT_HEADERS = {
   'Content-Language' => 'en-US'
 }.freeze
 
-class NoControllerError < StandardError; end
+class NoRouteError < StandardError; end
 
 def handle_request(env)
   request_path = URI(env['REQUEST_URI']).path.chomp('/')
@@ -17,10 +17,12 @@ def handle_request(env)
     controller_path = controller_file_path(request_path)
     require_controller(controller_path)
     response = fetch_response(env, klass(controller_path).new)
-  rescue NoMethodError, LoadError, NoControllerError => e
-    STDERR.puts e
-    STDERR.puts e.backtrace
-    return [ 404, DEFAULT_HEADERS, [] ]
+  rescue NoRouteError => e
+    STDERR.puts e, e.backtrace
+    response = { status: 404 }
+  rescue StandardError => e
+    STDERR.puts e, e.backtrace
+    response = { status: 500 }
   end
 
   [
@@ -34,7 +36,7 @@ def controller_file_path(path)
   if Routes.routes.include?(path)
     Routes.routes[path]
   else
-    raise NoControllerError
+    raise NoRouteError
   end
 end
 
@@ -43,16 +45,12 @@ def require_controller(path)
 end
 
 def fetch_response(env, controller)
-  begin
-    request_method = env['REQUEST_METHOD'].downcase
-    response = case request_method
-      when 'post','put','delete','trace','connect','patch','options'
-        controller.send(request_method, env)
-      else
-        controller.get(env)
-      end
-  rescue NoMethodError => e
-    controller.get(env)
+  request_method = env['REQUEST_METHOD'].downcase
+  valid_http_methods = %w[get head post delete put patch trace connect options]
+  if valid_http_methods.include?(request_method)
+    controller.send(request_method, env)
+  else
+    controller.send("bad_request", env)
   end
 end
 

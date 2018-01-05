@@ -5,7 +5,7 @@ class AbstractController
   end
 
   def head(env)
-    http_method_not_allowed
+    get(env) # Rack will clear the response body
   end
 
   def post(env)
@@ -36,6 +36,14 @@ class AbstractController
     { status: 200, headers: {'Allowed' => allowed} }
   end
 
+  def bad_request(env)
+    {
+      status: 400,
+      headers: {'Allowed' => allowed},
+      body: "400: Bad request--Unsupported HTTP verb"
+    }
+  end
+
   private
 
   def http_method_not_allowed
@@ -44,11 +52,10 @@ class AbstractController
 
   def allowed
     http_verbs = %i[get head post put delete trace connect patch options]
-    x = self.class.instance_methods(false).
+    self.class.instance_methods(false).
       &(http_verbs). # union
       map(&:to_s).
       map(&:upcase).
       join(', ')
-    x
   end
 end
