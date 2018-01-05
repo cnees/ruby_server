@@ -52,10 +52,12 @@ class AbstractController
 
   def allowed
     http_verbs = %i[get head post put delete trace connect patch options]
-    self.class.instance_methods(false).
+    self.class.
+      instance_methods(false).
       &(http_verbs). # union
       map(&:to_s).
       map(&:upcase).
       join(', ')
   end
+
 end

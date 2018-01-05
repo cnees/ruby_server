@@ -11,17 +11,13 @@ DEFAULT_HEADERS = {
 class NoRouteError < StandardError; end
 
 def handle_request(env)
-  request_path = URI(env['REQUEST_URI']).path.chomp('/')
-
   begin
-    controller_path = controller_file_path(request_path)
-    require_controller(controller_path)
-    response = fetch_response(env, klass(controller_path).new)
+    response = fetch_response(env, load_controller!(env))
   rescue NoRouteError => e
-    STDERR.puts e, e.backtrace
+    log_error(e)
     response = { status: 404 }
   rescue StandardError => e
-    STDERR.puts e, e.backtrace
+    log_error(e)
     response = { status: 500 }
   end
 
@@ -30,18 +26,6 @@ def handle_request(env)
     DEFAULT_HEADERS.merge(response&.[](:headers) || {}),
     response&.[](:body) ? [response[:body]] : []
   ]
-end
-
-def controller_file_path(path)
-  if Routes.routes.include?(path)
-    Routes.routes[path]
-  else
-    raise NoRouteError
-  end
-end
-
-def require_controller(path)
-  require_relative "./controllers#{path}.rb"
 end
 
 def fetch_response(env, controller)
@@ -54,8 +38,20 @@ def fetch_response(env, controller)
   end
 end
 
+def load_controller!(env)
+  request_path = URI(env['REQUEST_URI']).path.chomp('/')
+  raise NoRouteError unless Routes.routes.include?(request_path)
+  internal_path = Routes.routes[request_path]
+  require_relative "./controllers#{internal_path}.rb"
+  klass(internal_path).new
+end
+
 def klass(path)
   Object.const_get(path.split('/').last.split('_').map(&:capitalize).join)
+end
+
+def log_error(e)
+  STDERR.puts e, e.backtrace
 end
 
 Rack::Handler::WEBrick.run Proc.new{|env| handle_request(env)}
