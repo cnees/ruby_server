@@ -51,7 +51,7 @@ def fetch_response(env, controller)
       else
         controller.get(env)
       end
-  rescue NoMethodError
+  rescue NoMethodError => e
     controller.get(env)
   end
 end
