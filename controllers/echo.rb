@@ -17,4 +17,13 @@ class Echo < AbstractController
       body: [start_line, headers, request_body].flatten.join("\n")
     }
   end
+
+  alias_method :post, :get
+  alias_method :delete, :get
+  alias_method :put, :get
+  alias_method :patch, :get
+  alias_method :trace, :get
+  alias_method :connect, :get
+  alias_method :options, :get
+
 end
