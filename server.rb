@@ -1,4 +1,5 @@
 require 'rack'
+require 'rack/handler/puma'
 require 'uri'
 require './routes.rb'
 require './abstract_controller.rb'
@@ -54,4 +55,4 @@ def log_error(e)
   STDERR.puts e, e.backtrace
 end
 
-Rack::Handler::WEBrick.run Proc.new{|env| handle_request(env)}
+Rack::Handler::Puma.run Proc.new{|env| handle_request(env)}
