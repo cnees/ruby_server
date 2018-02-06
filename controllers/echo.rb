@@ -8,7 +8,7 @@ class Echo < AbstractController
 
     headers = env.
       select{|key, value| key.start_with?('HTTP_') && key != 'HTTP_VERSION' }.
-      map{|key, value| "#{key.split("_")[1..-1].join('-')}: #{value}"}
+      map{|key, value| "#{key.split("_")[1..-1].map(&:capitalize).join('-')}: #{value}"}
 
     request_body = "\n" + env['rack.input'].read
 
