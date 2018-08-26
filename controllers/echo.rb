@@ -1,5 +1,5 @@
 class Echo < AbstractController
-  def get(env)
+  def get(body, env)
     request_method = env['REQUEST_METHOD']
     request_uri = env['REQUEST_URI']
     http_version = env['HTTP_VERSION']
@@ -10,7 +10,7 @@ class Echo < AbstractController
       select{|key, value| key.start_with?('HTTP_') && key != 'HTTP_VERSION' }.
       map{|key, value| "#{key.split("_")[1..-1].map(&:capitalize).join('-')}: #{value}"}
 
-    request_body = "\n" + env['rack.input'].read
+    request_body = "\n" + body.to_s
 
     {
       headers: {'Content-Type' => 'text/plain; charset=utf-8'}.freeze,

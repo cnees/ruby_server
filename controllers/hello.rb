@@ -1,5 +1,5 @@
 class Hello < AbstractController
-  def get(env)
+  def get(body, env)
     {
       body: "Hello, Ben"
     }

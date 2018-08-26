@@ -1,5 +1,5 @@
 class Users < AbstractController
-  def get(env)
+  def get(body, env)
     {
       body: "You're the best."
     }
